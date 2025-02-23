@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { db } from '@/firebase/firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
+import Image from 'next/image';
 
 const BlogDetailPage = ({ params }: { params: { id: string } }) => {
   const { id } = params; // Get the blog ID from URL parameters
@@ -18,8 +20,8 @@ const BlogDetailPage = ({ params }: { params: { id: string } }) => {
         } else {
           // console.log("Blog not found");
         }
-      } catch (error) {
-        // console.log(`Error fetching blog details: ${error}`);
+      } catch (e) {
+        console.error(`Error fetching blog details: ${e}`);
       }
     };
 
@@ -33,9 +35,10 @@ const BlogDetailPage = ({ params }: { params: { id: string } }) => {
   return (
     <>
       <Navbar />
+      {/* <Image src={''} alt={''} /> */}
       <div className="container mx-auto p-4 max-w-4xl">
         <h1 className="text-4xl font-bold mb-4">{blog.title}</h1>
-        <img src={blog.pic} alt={blog.title} className="w-full lg:w-[60%] md:w-[50%] h-64 object-fill mb-6 rounded-lg " />
+        <Image src={blog.pic} alt={blog.title} height={100} width={100} className="w-full lg:w-[60%] md:w-[50%] h-64 object-fill mb-6 rounded-lg " />
         <p className="text-gray-700 dark:text-gray-300 mb-6">{blog.description}</p>
         <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
           By Roman | {new Date(blog.currentDate).toLocaleDateString()}

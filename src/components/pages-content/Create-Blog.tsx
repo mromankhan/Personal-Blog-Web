@@ -57,7 +57,7 @@ const CreateBlogContent = () => {
         "state_changed",
         (snapshot) => {
           const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          // console.log(`Upload ${progress}% complete`);
+          console.log(`Upload ${progress}% complete`);
         },
         (error) => {
           console.error("Upload failed:", error);

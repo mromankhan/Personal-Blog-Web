@@ -5,6 +5,11 @@ import { UseAuthStore } from "@/store/useAuthStore";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+type PropsType = {
+    blogId: string,
+    closeFunc: () => void
+}
+
 type Comments = {
     id: string,
     authorName: string,
@@ -12,7 +17,7 @@ type Comments = {
     timestamp: Timestamp
 }
 
-const CommentsSec = ({ blogId, closeFunc }: any) => {
+const CommentsSec = ({ blogId, closeFunc }: PropsType) => {
 
     const { user } = UseAuthStore((state) => state);
     const router = useRouter();

@@ -46,7 +46,7 @@ const ForgetPassword = () => {
                 router.push("/login");
             }, 5000);
         } catch (e) {
-            // console.log(e);
+            console.log(e);
             toast.error("Sorry! Something went Wrong Please Try Again Later!", {
                 theme: theme
             });

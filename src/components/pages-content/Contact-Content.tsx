@@ -56,8 +56,8 @@ const ContactContent = () => {
       notify();
 
     } catch (e) {
-      // console.log("message Sending error:", e);
-      alert("Failed to Send Message. Please Try Again.");
+      console.log("message Sending error:", e);
+      // alert("Failed to Send Message. Please Try Again.");
       toast.error("Message Send Failed Please try again Later...", {
         theme: theme, // Dynamically set toast theme
       });

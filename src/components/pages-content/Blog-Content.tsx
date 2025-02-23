@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import CommentsSec from '@/components/CommentsSec';
 import Navbar from '@/components/Navbar';
@@ -59,8 +60,8 @@ const BlogContent = () => {
       const snapshot = await getDocs(blogRef);
       const blogList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setBlogs(blogList);
-    } catch (error) {
-      // console.log(`Data fetching error ${error}`);
+    } catch (e) {
+      console.error(`Data fetching error ${e}`);
     }
   }
 
@@ -78,11 +79,10 @@ const BlogContent = () => {
         toast.success("Blog Deleted!");
 
       } catch (e) {
-        // console.log(`blog delete function error is ${e}`);
+        console.error(`blog delete function error is ${e}`);
       }
     } else {
-      // console.log("blog id is not available");
-
+      console.log("blog id is not available");
     }
   }
 
@@ -120,8 +120,8 @@ const BlogContent = () => {
           [blogId]: false,
         }));
       }
-    } catch (error) {
-      // console.log(`Error updating like: ${error}`);
+    } catch (e) {
+      console.error(`Error updating like: ${e}`);
       // Rollback state on error
       setBlogs((prevBlogs: any[]) =>
         prevBlogs.map((blog: any) =>
@@ -174,7 +174,7 @@ const BlogContent = () => {
         }));
       }
     } catch (error) {
-      // console.log(`Error updating dislike: ${error}`);
+      console.error(`Error updating dislike: ${error}`);
       // Rollback state on error
       setBlogs((prevBlogs: any[]) =>
         prevBlogs.map((blog: any) =>
@@ -231,6 +231,7 @@ const BlogContent = () => {
               }}>
               {/* Blog post image */}
               <img src={blog.pic} alt={blog.title} className="w-full h-64 object-fill transition-opacity duration-300 hover:opacity-90" />
+              {/* <Image src={blog.pic} alt={blog.title} height={100} width={100} className="w-full h-64 object-fill transition-opacity duration-300 hover:opacity-90" /> */}
 
               {/* Blog post content */}
               <div className="p-4 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-black dark:to-black">
@@ -254,7 +255,7 @@ const BlogContent = () => {
 
                 <div className="flex justify-between items-center">
                   {/* Link to the full blog post */}
-                  <Link href={`/blogPost/${blog.id}`} className={`${buttonVariants({ variant: "outline" })} transition-colors duration-300 hover:bg-gray-300 dark:hover:bg-gray-700`}>Click here</Link>
+                  <Link href={`/blogPost/${blog.id}`} className={`${buttonVariants({ variant: "outline" })} transition-colors duration-300 hover:bg-gray-300 dark:hover:bg-gray-700`}>Read More</Link>
                   <span onClick={() => { toggleCommentSec(blog.id) }}
                     className="cursor-pointer flex items-center mr-7 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors duration-300">
                     <FaRegCommentAlt className="sm:h-4 sm:w-4 md:h-5 md:w-5 lg:w-6 lg:h-6" /></span>

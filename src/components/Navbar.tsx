@@ -26,8 +26,8 @@ const Navbar = () => {
       await signOut(auth);
       console.log("Signout sucessfull");
       router.push("/");
-    } catch (e) {
-      console.error("Logout error is", e)
+      } catch (e) {
+        console.error("Logout error is", e)
     }
   }
 

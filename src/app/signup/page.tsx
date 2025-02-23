@@ -32,8 +32,8 @@ const Signup = () => {
   
       // Redirect user to home page
       router.push("/");
-    } catch (error) {
-      // console.error("Error saving user to Firestore:", error);
+    } catch (e) {
+      console.error("Error saving user to Firestore:", e);
     }
   }
   
@@ -48,7 +48,7 @@ const Signup = () => {
       // console.log(userData, "user created sucessfull");
 
     } catch (e) {
-      // console.log(e);
+      console.log(e);
     }
   }
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { db } from '@/firebase/firebaseConfig';
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
