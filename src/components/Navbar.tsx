@@ -20,14 +20,16 @@ const Navbar = () => {
 
   const router = useRouter();
   const { user } = UseAuthStore((state) => state);
+  const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL
+  const ADMIN_ID = process.env.NEXT_PUBLIC_ADMIN_ID
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
       console.log("Signout sucessfull");
       router.push("/");
-      } catch (e) {
-        console.error("Logout error is", e)
+    } catch (e) {
+      console.error("Logout error is", e)
     }
   }
 
@@ -50,7 +52,7 @@ const Navbar = () => {
           <Link href="/contact" className="hover:scale-105 hover:font-semibold transition-transform duration-300">
             Contact
           </Link>
-          {user?.email === "mromankhan005@gmail.com" && user?.uid === "4cLOtLZVlQgoDaNNFghl5OK5ldl2" ?
+          {user?.email === ADMIN_EMAIL && user?.uid === ADMIN_ID ?
             <Link href="/create-blog" className="hover:scale-105 hover:font-semibold transition-transform duration-300">
               Create Blog</Link> : ""}
           <div className='flex items-center'>
@@ -85,7 +87,7 @@ const Navbar = () => {
                     <Link href="/contact" className="hover:scale-105 hover:font-semibold transition-transform duration-300">
                       Contact
                     </Link>
-                    {user?.email === "mromankhan005@gmail.com" && user?.uid === "4cLOtLZVlQgoDaNNFghl5OK5ldl2"?
+                    {user?.email === ADMIN_EMAIL && user?.uid === ADMIN_ID ?
                       <Link href="/create-blog" className="hover:scale-105 hover:font-semibold transition-transform duration-300">
                         Create Blog</Link> : ""}
                     <div className='flex items-center'>

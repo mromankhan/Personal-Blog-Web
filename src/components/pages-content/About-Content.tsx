@@ -1,4 +1,4 @@
-"use client"   
+"use client"
 import Navbar from '@/components/Navbar';
 import animationImgData from "@/lib/animationImgData.json"
 import Lottie from 'lottie-react';

@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from "remark-gfm";
 import CommentsSec from '@/components/CommentsSec';
 import Navbar from '@/components/Navbar';
 import { buttonVariants } from '@/components/ui/button';
@@ -16,12 +18,16 @@ import { MdDelete } from "react-icons/md";
 import { UseAuthStore } from '@/store/useAuthStore';
 import { deleteDoc } from 'firebase/firestore';
 import { ToastContainer, toast } from 'react-toastify';
+import Image from 'next/image';
 import 'react-toastify/dist/ReactToastify.css';
 
 
 const BlogContent = () => {
 
   const { user } = UseAuthStore((state) => state);
+  const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL
+  const ADMIN_ID = process.env.NEXT_PUBLIC_ADMIN_ID
+
 
   const [blogs, setBlogs] = useState<any>([]);
   const [likedBlogs, setLikedBlogs] = useState<{ [key: string]: boolean }>({});
@@ -216,7 +222,7 @@ const BlogContent = () => {
     const [year, month, day] = unOrderDate.split("-");
     return `${day}-${month}-${year}`;
   }
-  
+
   return (
     <>
       <Navbar />
@@ -229,20 +235,36 @@ const BlogContent = () => {
               onMouseLeave={() => {
                 setHoveredBlogId(null)
               }}>
+
               {/* Blog post image */}
-              <img src={blog.pic} alt={blog.title} className="w-full h-64 object-fill transition-opacity duration-300 hover:opacity-90" />
-              {/* <Image src={blog.pic} alt={blog.title} height={100} width={100} className="w-full h-64 object-fill transition-opacity duration-300 hover:opacity-90" /> */}
+              {/* <img src={blog.pic} alt={blog.title} className="w-full h-64 object-fill transition-opacity duration-300 hover:opacity-90" /> */}
+              <Image
+                src={blog.pic}
+                alt={blog.title}
+                width={500} // Adjust width as needed
+                height={256} // Adjust height as needed
+                className="w-full h-64 object-cover rounded-t-xl transition-opacity duration-300 hover:opacity-90"
+              />
+
 
               {/* Blog post content */}
               <div className="p-4 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-black dark:to-black">
                 {/* Blog post title */}
                 <div className="flex justify-between">
-                  <h2 className="text-2xl font-bold mb-2 text-gray-800 dark:text-gray-100">{blog.title}</h2>
-                  {user?.email === "mromankhan005@gmail.com" && user?.uid === "4cLOtLZVlQgoDaNNFghl5OK5ldl2" ? <div>{hoveredBlogId === blog.id && (<span aria-label='Delete' className='cursor-pointer' onClick={() => { handleDelete(blog.id) }}><MdDelete /></span>)}</div> : ""}
+                  <u><h2 className="text-2xl font-bold mb-2 text-gray-800 dark:text-gray-100">{blog.title}</h2></u>
+                  {user?.email === ADMIN_EMAIL && user?.uid === ADMIN_ID ? <div>{hoveredBlogId === blog.id && (<span aria-label='Delete' className='cursor-pointer' onClick={() => { handleDelete(blog.id) }}><MdDelete /></span>)}</div> : ""}
                 </div>
 
                 {/* Blog post description */}
-                <p className="mb-4 text-gray-700 dark:text-gray-300">{truncateDescription(blog.description)}</p>
+                <p className="mb-4 text-gray-700 dark:text-gray-300"><ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    h1: (props) => <h1 className="text-3xl font-bold my-4" {...props} />,
+                    h2: (props) => <h2 className="text-2xl font-semibold my-3" {...props} />,
+                    h3: (props) => <h3 className="text-xl font-medium my-2" {...props} />,
+                    p: (props) => <p className="text-gray-700 leading-6 my-2" {...props} />,
+                  }}
+                >{truncateDescription(blog.description)}</ReactMarkdown></p>
 
                 {/* Blog post author and date */}
                 <div className="text-sm mb-4 flex justify-between text-gray-600 dark:text-gray-400">

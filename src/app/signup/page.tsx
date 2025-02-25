@@ -9,34 +9,20 @@ const Signup = () => {
 
   const router = useRouter();
 
-  // const saveUserInFirestore = async (email: string, uid: string) => {
-  //   const user = { email, uid };
-  //   const docRef = doc(db, "users", uid);
-  //   await setDoc(docRef, user);
-  //   router.push("/");
-  // }
-  
-  // async function saveUserInFirestore (email: string, uid: string){
-  //   const user = { email, uid };
-  //   const docRef = doc(db, "users", uid);
-  //   await setDoc(docRef, user);
-  //   router.push("/");
-  // }
-
   async function saveUserInFirestore(email: string, uid: string) {
     try {
       const user = { email, uid };
       const docRef = doc(db, "users", uid);
       await setDoc(docRef, user);
       // console.log("User successfully saved in Firestore");
-  
+
       // Redirect user to home page
       router.push("/");
     } catch (e) {
       console.error("Error saving user to Firestore:", e);
     }
   }
-  
+
 
 
   const signup = async (email: string, password: string, userName: string) => {

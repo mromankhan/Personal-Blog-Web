@@ -1,89 +1,81 @@
 "use client";
 import Navbar from '@/components/Navbar'
-import { db, storage } from '@/firebase/firebaseConfig';
+import { db } from '@/firebase/firebaseConfig';
 import { addDoc, collection } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react'
-import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import RichTextInput from '@/components/RichTextInput';
 
 const CreateBlogContent = () => {
-
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [pic, setPic] = useState<File>();
+  const [pic, setPic] = useState<File | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date().toISOString().split('T')[0]);
-  const [theme, setTheme] = useState<'light' | 'dark'>('light'); // Default theme
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const likes = 0;
   const dislikes = 0;
 
-
   useEffect(() => {
-    // Function to detect theme
     const detectTheme = () => {
       const dataTheme = document.documentElement.getAttribute('data-theme');
       const classTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-
-      // Prefer `data-theme`, fallback to class-based
-      const currentTheme = dataTheme || classTheme;
-      setTheme(currentTheme === 'dark' ? 'dark' : 'light');
+      setTheme(dataTheme || classTheme === 'dark' ? 'dark' : 'light');
     };
 
-    // Initial detection
     detectTheme();
-
-    // Listen for changes to `data-theme` or class attribute
     const observer = new MutationObserver(detectTheme);
     observer.observe(document.documentElement, { attributes: true });
 
-    return () => observer.disconnect(); // Cleanup observer
+    return () => observer.disconnect();
   }, []);
 
+  const uploadToCloudinary = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "my_blog_uploads"); // Apna Cloudinary Upload Preset Replace Karo
+    formData.append("cloud_name", "dtqfdhyhb"); // Apna Cloudinary Cloud Name Replace Karo
 
 
-  const uploadPic = async (): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      if (!pic) {
-        toast.error("Image is required!", { theme });
-        reject("No image selected");
-        return;
+    try {
+      const res = await fetch("https://api.cloudinary.com/v1_1/dtqfdhyhb/image/upload?resource_type=raw", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.error("Cloudinary Response Error:", data);
+        throw new Error(data.error?.message || "Failed to upload image");
       }
 
-      const uniqueFileName = `images/${new Date().getTime()}-${pic.name}`;
-      const storageRef = ref(storage, uniqueFileName);
-      const uploadTask = uploadBytesResumable(storageRef, pic);
+      if (!data.secure_url) {
+        throw new Error("Cloudinary did not return an image URL");
+      }
 
-      uploadTask.on(
-        "state_changed",
-        (snapshot) => {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log(`Upload ${progress}% complete`);
-        },
-        (error) => {
-          console.error("Upload failed:", error);
-          toast.error("Image upload failed. Please try again.", { theme });
-          reject(error);
-        },
-        async () => {
-          try {
-            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-            // console.log(`File available at ${downloadURL}`);
-            resolve(downloadURL);
-          } catch (error) {
-            // console.error("Error fetching download URL:", error);
-            reject(error);
-          }
-        }
-      );
-    });
+      return data.secure_url; // Image ka Cloudinary URL return karega
+    } catch (error) {
+      console.error("Cloudinary Upload Error:", error);
+      throw new Error("Image upload failed");
+    }
   };
 
+  // Upload Image & Return URL
+  const uploadPic = async (): Promise<string> => {
+    if (!pic) {
+      toast.error("Image is required!", { theme });
+      throw new Error("No image selected");
+    }
+
+    return await uploadToCloudinary(pic);
+  };
+
+  // Add New Blog to Firestore
   const addNewBlog = async () => {
     try {
-      // Wait for the image to upload and get its URL
       const imageUrl = await uploadPic();
 
-      // Prepare the new blog object
       const newBlog = {
         title,
         description,
@@ -93,14 +85,11 @@ const CreateBlogContent = () => {
         dislikes
       };
 
-      // Save to Firestore
-      const dbRef = collection(db, "blogs");
-      await addDoc(dbRef, newBlog);
+      await addDoc(collection(db, "blogs"), newBlog);
 
-      // console.log(`New Blog Added: ${JSON.stringify(newBlog)}`);
       setTitle("");
       setDescription("");
-      setPic(undefined); // Clear the selected image
+      setPic(null);
       toast.success("Blog Added Successfully!", { theme });
     } catch (error) {
       console.error("Error while adding blog:", error);
@@ -108,53 +97,80 @@ const CreateBlogContent = () => {
     }
   };
 
-
-  // submit refreshing handler
-  const submitHandler = (e: React.FormEvent) => {
-    e.preventDefault()
-  }
-
   return (
     <>
       <Navbar />
       <ToastContainer position='top-center' theme={theme} />
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 p-4 ">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 p-4">
         <h1 className="text-4xl font-bold mb-8 text-center text-gray-900 dark:text-gray-100">Create New Post</h1>
-        <form onSubmit={submitHandler} className="w-full max-w-lg bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg">
+        <form onSubmit={(e) => e.preventDefault()} className="w-full max-w-2xl bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg">
+          {/* Title */}
           <div className="mb-6">
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Title</label>
-            <input type="text" id="title" name="title"
-              value={title} onChange={(e) => { setTitle(e.target.value) }}
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Title
+            </label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
-                        focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400" required />
-          </div>
-          <div className="mb-6">
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
-            <textarea id="description" name="description" rows={4}
-              value={description} onChange={(e) => { setDescription(e.target.value) }}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
-                        focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400" required>
-            </textarea></div>
-          <div className="mb-6">
-            <label htmlFor="image" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Image Upload</label>
-            <input type="file" id="image" name="image" accept="image/*"
-              onChange={(e) => { const file = e.target.files; if (file?.length) { setPic(file[0]); } }}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
-                        focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-[#121212]" required />
+              focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400
+              bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              required
+            />
           </div>
 
+          {/* Description */}
           <div className="mb-6">
-            <label htmlFor="date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 
-                        mb-2">Current Date</label>
-            <input type="date" id="date" name="date"
-              value={currentDate} onChange={(e) => { setCurrentDate(e.target.value) }}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
-                        focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400" required />
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Description
+            </label>
+            <div className="rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden">
+              <RichTextInput value={description} onChange={setDescription} />
+            </div>
           </div>
-          <button type="submit" onClick={addNewBlog}
+
+          {/* Image Upload */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Image Upload
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setPic(e.target.files?.[0] || null)}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
+              focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 
+              dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              required
+            />
+          </div>
+
+          {/* Current Date */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Current Date
+            </label>
+            <input
+              type="date"
+              value={currentDate}
+              onChange={(e) => setCurrentDate(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
+              focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400
+              bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              required
+            />
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="button"
+            onClick={addNewBlog}
             className="w-full py-3 px-4 bg-blue-600 dark:bg-blue-500
-                     text-white font-semibold rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 
-                     focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400">Submit
+            text-white font-semibold rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 
+            focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+          >
+            Submit
           </button>
         </form>
       </div>
@@ -162,17 +178,4 @@ const CreateBlogContent = () => {
   )
 }
 
-export default CreateBlogContent
-
-
-
-
-
-
-
-
-
-
-
-
-
+export default CreateBlogContent;

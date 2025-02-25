@@ -2,7 +2,12 @@
 "use client";
 import { db } from '@/firebase/firebaseConfig';
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from "remark-gfm";
+import { buttonVariants } from './ui/button';
+import Image from 'next/image';
 
 const TopBlogsSection = () => {
   const [topBlogs, setTopBlogs] = useState<any[]>([]);
@@ -49,14 +54,25 @@ const TopBlogsSection = () => {
           {topBlogs.map(blog => (
             <div key={blog.id} className="w-full sm:w-1/2 lg:w-1/3 p-4">
               <div className="p-6 bg-white rounded-lg shadow-lg dark:bg-gray-800 transform transition duration-500 hover:scale-105 text-center">
-                <img
+                <Image
                   src={blog.pic}
                   alt={blog.title}
-                  className="w-full h-64 object-fill transition-opacity duration-300 hover:opacity-90"
+                  width={500} // Adjust width as needed
+                  height={256} // Adjust height as needed
+                  className="w-full h-64 object-cover rounded-t-xl transition-opacity duration-300 hover:opacity-90"
                 />
-                <p className="text-gray-600 dark:text-gray-400">{truncateDescription(blog.description)}</p>
                 <h3 className="mt-4 text-xl font-semibold text-gray-800 dark:text-gray-200">{blog.title}</h3>
-                <p className="mt-2 text-gray-500 dark:text-gray-300">{blog.likes} Likes</p>
+                <p className="text-gray-600 dark:text-gray-400"><ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    h1: (props) => <h1 className="text-3xl font-bold my-4" {...props} />,
+                    h2: (props) => <h2 className="text-2xl font-semibold my-3" {...props} />,
+                    h3: (props) => <h3 className="text-xl font-medium my-2" {...props} />,
+                    p: (props) => <p className="text-gray-700 leading-6 my-2" {...props} />,
+                  }}
+                >{truncateDescription(blog.description)}</ReactMarkdown></p>
+                <p className="my-2 text-gray-500 dark:text-gray-300">{blog.likes} Likes</p>
+                <Link href={`/blogPost/${blog.id}`} className={`${buttonVariants({ variant: "outline" })} transition-colors duration-300 hover:bg-gray-300 dark:hover:bg-gray-700`}>Read More</Link>
               </div>
             </div>
           ))}
