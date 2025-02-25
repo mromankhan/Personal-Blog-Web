@@ -1,6 +1,6 @@
 "use client"
 import Navbar from '@/components/Navbar';
-import animationImgData from "@/lib/animationImgData.json"
+import animationImgData from "../../../public/animationImgData.json"
 import Lottie from 'lottie-react';
 
 const AboutContent = () => {
