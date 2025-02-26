@@ -36,24 +36,26 @@ const Navbar = () => {
   return (
     <nav className="p-4 bg-background/50 sticky top-0 backdrop-blur border-b z-10">
       <div className="container mx-auto flex justify-between items-center">
-        <Link href={"/"}><div className="container mx-auto flex justify-between items-center font-semibold text-2xl">
+        <Link href={"/"}>
+        <div className="container mx-auto flex justify-between items-center font-semibold text-2xl">
           Roman&apos;s Blog
-        </div></Link>
+        </div>
+        </Link>
         <div className="hidden md:flex space-x-4 items-center">
-          <Link href="/" className="hover:scale-105 hover:font-semibold transition-transform duration-300">
+          <Link href="/" className="hover:scale-105 text-[20px] hover:font-semibold transition-transform duration-300">
             Home
           </Link>
-          <Link href="/about" className="hover:scale-105 hover:font-semibold transition-transform duration-300">
+          <Link href="/about" className="hover:scale-105 text-[20px] hover:font-semibold transition-transform duration-300">
             About
           </Link>
-          <Link href="/blog" className="hover:scale-105 hover:font-semibold transition-transform duration-300">
+          <Link href="/blog" className="hover:scale-105 text-[20px] hover:font-semibold transition-transform duration-300">
             Blog
           </Link>
-          <Link href="/contact" className="hover:scale-105 hover:font-semibold transition-transform duration-300">
+          <Link href="/contact" className="hover:scale-105 text-[20px] hover:font-semibold transition-transform duration-300">
             Contact
           </Link>
           {user?.email === ADMIN_EMAIL && user?.uid === ADMIN_ID ?
-            <Link href="/create-blog" className="hover:scale-105 hover:font-semibold transition-transform duration-300">
+            <Link href="/create-blog" className="hover:scale-105 text-[20px] hover:font-semibold transition-transform duration-300">
               Create Blog</Link> : ""}
           <div className='flex items-center'>
             {user ? <span><Button className="mx-1" variant="outline" onClick={handleLogout}>Logout</Button></span> :
@@ -72,23 +74,23 @@ const Navbar = () => {
 
             <SheetContent>
               <SheetHeader className="flex items-center">
-                <SheetTitle className="font-bold my-4">Roman&apos;s Blog</SheetTitle>
+                <SheetTitle><Link href={'/'} className="container mx-auto flex justify-between items-center font-semibold text-2xl mb-3"> Roman&apos;s Blog</Link></SheetTitle>
                 <SheetDescription>
                   <div className='flex flex-col items-center gap-6'>
-                    <Link href="/" className="hover:scale-105 hover:font-semibold transition-transform duration-300">
+                    <Link href="/" className="hover:scale-105 text-[20px] hover:font-semibold transition-transform duration-300">
                       Home
                     </Link>
-                    <Link href="/about" className="hover:scale-105 hover:font-semibold transition-transform duration-300">
+                    <Link href="/about" className="hover:scale-105 text-[20px] hover:font-semibold transition-transform duration-300">
                       About
                     </Link>
-                    <Link href="/blog" className="hover:scale-105 hover:font-semibold transition-transform duration-300">
+                    <Link href="/blog" className="hover:scale-105 text-[20px] hover:font-semibold transition-transform duration-300">
                       Blog
                     </Link>
-                    <Link href="/contact" className="hover:scale-105 hover:font-semibold transition-transform duration-300">
+                    <Link href="/contact" className="hover:scale-105 text-[20px] hover:font-semibold transition-transform duration-300">
                       Contact
                     </Link>
                     {user?.email === ADMIN_EMAIL && user?.uid === ADMIN_ID ?
-                      <Link href="/create-blog" className="hover:scale-105 hover:font-semibold transition-transform duration-300">
+                      <Link href="/create-blog" className="hover:scale-105 hover:font-semibold text-[20px] transition-transform duration-300">
                         Create Blog</Link> : ""}
                     <div className='flex items-center'>
                       {user ? <span><Button className="mx-1" variant="outline" onClick={handleLogout}>Logout</Button></span> :

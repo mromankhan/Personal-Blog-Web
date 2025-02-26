@@ -1,9 +1,23 @@
 "use client"
 import Navbar from '@/components/Navbar';
-import animationImgData from "../../../public/animationImgData.json"
-import Lottie from 'lottie-react';
+import dynamic from 'next/dynamic';
+// import animationImgData from "../../../public/animationImgData.json"
+// import Lottie from 'lottie-react';
+import { useEffect, useState } from 'react';
+const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 
 const AboutContent = () => {
+
+  const [animationData, setAnimationData] = useState(null);
+
+  useEffect(() => {
+    fetch("/animationImgData.json")
+      .then((res) => res.json())
+      .then((data) => setAnimationData(data))
+      .catch((err) => console.error("Error loading animation:", err));
+  }, []);
+
+
   return (
     <>
       <Navbar />
@@ -13,7 +27,9 @@ const AboutContent = () => {
             <div className="flex flex-col md:flex-row">
               <div className="w-full md:w-1/3 flex justify-center items-center mb-8 md:mb-0 ">
                 <div className="relative -top-7 w-48 h-48 rounded-full overflow-hidden">
-                  <Lottie animationData={animationImgData} loop={true} style={{ width: 200, height: 180 }} />
+                  {animationData && (
+                    <Lottie animationData={animationData} loop={true} style={{ width: 200, height: 180 }} />
+                  )}
                 </div>
               </div>
               <div className="w-full md:w-2/3 flex flex-col justify-center ">
