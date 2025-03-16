@@ -1,18 +1,26 @@
 "use client";
 import Navbar from '@/components/Navbar'
 import { db } from '@/firebase/firebaseConfig';
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, updateDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import RichTextInput from '@/components/RichTextInput';
+import { useSearchParams } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 
 const CreateBlogContent = () => {
+  const searchParams = useSearchParams();
+  const blogId = searchParams.get("blogId");
+
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [pic, setPic] = useState<File | null>(null);
+  const [existingPic, setExistingPic] = useState("");
   const [currentDate, setCurrentDate] = useState(new Date().toISOString().split('T')[0]);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [loading, setLoading] = useState(false);
   const likes = 0;
   const dislikes = 0;
 
@@ -30,12 +38,29 @@ const CreateBlogContent = () => {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    if (blogId) {
+      const fetchBlog = async () => {
+        const docRef = doc(db, "blogs", blogId);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const blogData = docSnap.data();
+          setTitle(blogData.title);
+          setDescription(blogData.description);
+          setExistingPic(blogData.pic);
+          setCurrentDate(blogData.currentDate);
+        }
+      };
+      fetchBlog();
+    }
+  }, [blogId]);
+
   const uploadToCloudinary = async (file: File): Promise<string> => {
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("upload_preset", "my_blog_uploads"); // Apna Cloudinary Upload Preset Replace Karo
-    formData.append("cloud_name", "dtqfdhyhb"); // Apna Cloudinary Cloud Name Replace Karo
-
+    formData.append("upload_preset", "my_blog_uploads");
+    formData.append("cloud_name", "dtqfdhyhb");
 
     try {
       const res = await fetch("https://api.cloudinary.com/v1_1/dtqfdhyhb/image/upload?resource_type=raw", {
@@ -44,56 +69,47 @@ const CreateBlogContent = () => {
       });
 
       const data = await res.json();
-
-      if (!res.ok) {
-        console.error("Cloudinary Response Error:", data);
-        throw new Error(data.error?.message || "Failed to upload image");
+      if (!res.ok || !data.secure_url) {
+        throw new Error("Failed to upload image");
       }
-
-      if (!data.secure_url) {
-        throw new Error("Cloudinary did not return an image URL");
-      }
-
-      return data.secure_url; // Image ka Cloudinary URL return karega
+      return data.secure_url;
     } catch (error) {
       console.error("Cloudinary Upload Error:", error);
       throw new Error("Image upload failed");
     }
   };
 
-  // Upload Image & Return URL
-  const uploadPic = async (): Promise<string> => {
-    if (!pic) {
-      toast.error("Image is required!", { theme });
-      throw new Error("No image selected");
-    }
-
-    return await uploadToCloudinary(pic);
-  };
-
-  // Add New Blog to Firestore
-  const addNewBlog = async () => {
+  const handleBlogSubmission = async () => {
+    setLoading(true);
     try {
-      const imageUrl = await uploadPic();
+      const imageUrl = pic ? await uploadToCloudinary(pic) : existingPic;
 
-      const newBlog = {
+      const blogData = {
         title,
         description,
         pic: imageUrl,
         currentDate,
         likes,
-        dislikes
+        dislikes,
       };
 
-      await addDoc(collection(db, "blogs"), newBlog);
+      if (blogId) {
+        const docRef = doc(db, "blogs", blogId);
+        await updateDoc(docRef, blogData);
+        toast.success("Blog Updated Successfully!", { theme });
+      } else {
+        await addDoc(collection(db, "blogs"), blogData);
+        toast.success("Blog Added Successfully!", { theme });
+      }
 
       setTitle("");
       setDescription("");
       setPic(null);
-      toast.success("Blog Added Successfully!", { theme });
     } catch (error) {
-      console.error("Error while adding blog:", error);
-      toast.error("Failed to add blog. Please try again.", { theme });
+      console.error("Error while handling blog:", error);
+      toast.error("Failed to process blog. Please try again.", { theme });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -101,81 +117,36 @@ const CreateBlogContent = () => {
     <>
       <Navbar />
       <ToastContainer position='top-center' theme={theme} />
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 p-4">
-        <h1 className="text-4xl font-bold mb-8 text-center text-gray-900 dark:text-gray-100">Create New Post</h1>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-[#0a0a0a] p-4">
+        <h1 className="text-4xl font-bold mb-8 text-center text-gray-900 dark:text-gray-100">
+          {blogId ? "Edit Blog" : "Create New Post"}
+        </h1>
         <form onSubmit={(e) => e.preventDefault()} className="w-full max-w-2xl bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg">
-          {/* Title */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Title
-            </label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
-              focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400
-              bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-              required
-            />
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Title</label>
+            <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" />
           </div>
 
-          {/* Description */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Description
-            </label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
             <div className="rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden">
               <RichTextInput value={description} onChange={setDescription} />
             </div>
           </div>
 
-          {/* Image Upload */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Image Upload
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setPic(e.target.files?.[0] || null)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
-              focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 
-              dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-              required
-            />
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Image Upload</label>
+            <input type="file" accept="image/*" onChange={(e) => setPic(e.target.files?.[0] || null)} className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 dark:bg-gray-700 text-gray-900 dark:text-gray-100" />
+            {existingPic && !pic && <img src={existingPic} alt="Existing Blog" className="mt-4 w-full h-40 object-cover rounded" />}
           </div>
 
-          {/* Current Date */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Current Date
-            </label>
-            <input
-              type="date"
-              value={currentDate}
-              onChange={(e) => setCurrentDate(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
-              focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400
-              bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-              required
-            />
-          </div>
-
-          {/* Submit Button */}
-          <button
-            type="button"
-            onClick={addNewBlog}
-            className="w-full py-3 px-4 bg-blue-600 dark:bg-blue-500
-            text-white font-semibold rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 
-            focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
-          >
-            Submit
+          <button type="button" disabled={loading} onClick={handleBlogSubmission} className="w-full py-3 px-4 bg-blue-600 dark:bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400">
+            {loading ? <Loader2 className="size-12 animate-spin" /> : blogId ? "Update Blog" : "Submit"}
           </button>
         </form>
       </div>
     </>
-  )
-}
+  );
+};
 
 export default CreateBlogContent;

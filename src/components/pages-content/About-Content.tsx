@@ -1,8 +1,6 @@
 "use client"
 import Navbar from '@/components/Navbar';
 import dynamic from 'next/dynamic';
-// import animationImgData from "../../../public/animationImgData.json"
-// import Lottie from 'lottie-react';
 import { useEffect, useState } from 'react';
 const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 
@@ -22,7 +20,7 @@ const AboutContent = () => {
     <>
       <Navbar />
       <div>
-        <div className="flex flex-col items-center justify-center py-32 bg-gray-100 dark:bg-gray-700 ">
+        <div className="flex flex-col items-center justify-center py-32 bg-gray-100 dark:bg-[#0a0a0a] ">
           <div className="w-full max-w-4xl p-8 bg-white dark:bg-gray-800 shadow-lg rounded-lg">
             <div className="flex flex-col md:flex-row">
               <div className="w-full md:w-1/3 flex justify-center items-center mb-8 md:mb-0 ">
@@ -45,7 +43,7 @@ const AboutContent = () => {
           </div>
         </div>
 
-        <section className="py-16 bg-gray-50 dark:bg-gray-800 dark:text-white">
+        <section className="py-16 bg-gray-50 dark:bg-[#0a0a0a] dark:text-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white">Roman&apos;s Journey as a Coder</h2>

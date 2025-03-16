@@ -36,9 +36,6 @@ const ContactContent = () => {
 
 
   const handleSubmit = async (e: React.FormEvent) => {
-    const notify = () => toast("Message Send SucessFully!", {
-      theme: theme, // Dynamically set toast theme
-    });
     e.preventDefault()
     const msgData = {
       name,
@@ -53,10 +50,11 @@ const ContactContent = () => {
       setName("");
       setEmail("");
       setMessage("")
-      notify();
+      toast.success("Blog Updated Successfully!", { theme });
 
     } catch (e) {
-      console.log("message Sending error:", e);
+      void e;
+      // console.log("message Sending error:", e); for dev
       // alert("Failed to Send Message. Please Try Again.");
       toast.error("Message Send Failed Please try again Later...", {
         theme: theme, // Dynamically set toast theme
@@ -68,7 +66,8 @@ const ContactContent = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <ToastContainer position='top-center' theme={theme} />
+      <div className="min-h-screen bg-gray-100 dark:bg-[#0a0a0a] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8 relative -top-10">
           <div>
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">

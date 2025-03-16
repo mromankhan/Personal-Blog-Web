@@ -4,6 +4,7 @@ import { auth, db } from '@/firebase/firebaseConfig';
 import { useRouter } from 'next/navigation';
 import { doc, setDoc } from 'firebase/firestore';
 import AuthFoam from '@/components/AuthFoam';
+import { toast, ToastContainer } from 'react-toastify';
 
 const Signup = () => {
 
@@ -14,12 +15,13 @@ const Signup = () => {
       const user = { email, uid };
       const docRef = doc(db, "users", uid);
       await setDoc(docRef, user);
-      // console.log("User successfully saved in Firestore");
+      // console.log("User successfully saved in Firestore"); for dev
 
       // Redirect user to home page
       router.push("/");
     } catch (e) {
-      console.error("Error saving user to Firestore:", e);
+      void e;
+      // console.error("Error saving user to Firestore:", e); for dev
     }
   }
 
@@ -34,13 +36,16 @@ const Signup = () => {
       // console.log(userData, "user created sucessfull");
 
     } catch (e) {
-      console.log(e);
+      void e;
+      toast.error("Something went Wrong")
+      // console.log(e); for dev
     }
   }
 
 
   return (
     <>
+      <ToastContainer position='top-center' />
       <AuthFoam signup={true} func={signup} />
     </>
   );

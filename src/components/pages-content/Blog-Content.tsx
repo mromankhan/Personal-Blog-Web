@@ -14,16 +14,19 @@ import { AiFillLike } from "react-icons/ai";
 import { AiOutlineDislike } from "react-icons/ai";
 import { AiFillDislike } from "react-icons/ai";
 import { FaRegCommentAlt } from "react-icons/fa";
-import { MdDelete } from "react-icons/md";
+import { MdDelete, MdEdit } from "react-icons/md";
+import { Loader, MoreVertical } from "lucide-react";
 import { UseAuthStore } from '@/store/useAuthStore';
 import { deleteDoc } from 'firebase/firestore';
 import { ToastContainer, toast } from 'react-toastify';
 import Image from 'next/image';
 import 'react-toastify/dist/ReactToastify.css';
+import { useRouter } from 'next/navigation';
 
 
 const BlogContent = () => {
 
+  const router = useRouter();
   const { user } = UseAuthStore((state) => state);
   const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL
   const ADMIN_ID = process.env.NEXT_PUBLIC_ADMIN_ID
@@ -67,7 +70,8 @@ const BlogContent = () => {
       const blogList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setBlogs(blogList);
     } catch (e) {
-      console.error(`Data fetching error ${e}`);
+      void e;
+      // console.error(`Data fetching error ${e}`); for dev
     }
   }
 
@@ -85,12 +89,20 @@ const BlogContent = () => {
         toast.success("Blog Deleted!");
 
       } catch (e) {
-        console.error(`blog delete function error is ${e}`);
+        void e;
+        // console.error(`blog delete function error is ${e}`);   for dev
       }
     } else {
-      console.log("blog id is not available");
+      // console.log("blog id is not available"); for dev
     }
   }
+
+
+  const handleEdit = (blog: any) => {
+    router.push(`/create-blog?blogId=${blog.id}`); // Blog ID pass kar rahe hain
+  };
+
+
 
   const handleLike = async (blogId: string) => {
     const currentLikeStatus = likedBlogs[blogId] || false;
@@ -127,7 +139,8 @@ const BlogContent = () => {
         }));
       }
     } catch (e) {
-      console.error(`Error updating like: ${e}`);
+      void e;
+      // console.error(`Error updating like: ${e}`); for dev
       // Rollback state on error
       setBlogs((prevBlogs: any[]) =>
         prevBlogs.map((blog: any) =>
@@ -179,8 +192,9 @@ const BlogContent = () => {
           [blogId]: false,
         }));
       }
-    } catch (error) {
-      console.error(`Error updating dislike: ${error}`);
+    } catch (e) {
+      void e;
+      // console.error(`Error updating dislike: ${e}`); for dev
       // Rollback state on error
       setBlogs((prevBlogs: any[]) =>
         prevBlogs.map((blog: any) =>
@@ -223,6 +237,10 @@ const BlogContent = () => {
     return `${day}-${month}-${year}`;
   }
 
+  if (blogs.length === 0) {
+    return <div className="flex items-center justify-center h-screen"><Loader className="size-20 animate-spin" /></div>;
+  }
+
   return (
     <>
       <Navbar />
@@ -248,11 +266,17 @@ const BlogContent = () => {
 
 
               {/* Blog post content */}
-              <div className="p-4 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-black dark:to-black">
+              <div className="p-4 dark:from-black dark:to-black">
                 {/* Blog post title */}
                 <div className="flex justify-between">
-                  <u><h2 className="text-2xl font-bold mb-2 text-gray-800 dark:text-gray-100">{blog.title}</h2></u>
-                  {user?.email === ADMIN_EMAIL && user?.uid === ADMIN_ID ? <div>{hoveredBlogId === blog.id && (<span aria-label='Delete' className='cursor-pointer' onClick={() => { handleDelete(blog.id) }}><MdDelete /></span>)}</div> : ""}
+                  <u><h2 className="text-2xl font-bold mb-2 italic text-gray-800 dark:text-gray-100">{blog.title}</h2></u>
+                  {user?.email === ADMIN_EMAIL && user?.uid === ADMIN_ID ? <div>{hoveredBlogId === blog.id && (<div className="dropdown dropdown-bottom dropdown-end transition-all">
+                    <div tabIndex={0} role="button" className="m-1"><MoreVertical size={20} /></div>
+                    <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-1 w-32 p-2 shadow-sm dark:bg-zinc-900">
+                      <li aria-label='Edit' onClick={() => { handleEdit(blog) }}><a><MdEdit size={18} /> Edit</a></li>
+                      <li aria-label='Delete' onClick={() => { handleDelete(blog.id) }}><a><MdDelete size={18} /> Delete</a></li>
+                    </ul>
+                  </div>)}</div> : ""}
                 </div>
 
                 {/* Blog post description */}

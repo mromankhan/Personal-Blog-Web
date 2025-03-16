@@ -38,7 +38,7 @@ export const UseAuthStore = create<UseAuthStoreType>((set) => ({
     user: null,
     userData: null,
     isAuthenticated: false,
-    loading: true,
+    loading: false,
 
     // Login function
     login: async (email, password, onSuccess) => {
@@ -58,7 +58,8 @@ export const UseAuthStore = create<UseAuthStoreType>((set) => ({
 
             if (onSuccess) onSuccess();
         } catch (e) {
-            console.log(e);
+            void e;
+            // console.log(e); for dev
             toast.error("Invalid Email or Password");
         } finally {
             set({ loading: false });
@@ -82,7 +83,8 @@ export const UseAuthStore = create<UseAuthStoreType>((set) => ({
                 set({ userData: data });
             }
         } catch (e) {
-            console.log(`userDataFetching function error: ${e}`);
+            void e;
+            // console.log(`userDataFetching function error: ${e}`); for dev
         }
     },
 }));

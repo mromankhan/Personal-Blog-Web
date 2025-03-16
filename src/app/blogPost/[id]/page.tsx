@@ -7,6 +7,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Image from 'next/image';
+import { Loader } from 'lucide-react';
 
 const BlogDetailPage = ({ params }: { params: { id: string } }) => {
   const { id } = params;
@@ -21,7 +22,8 @@ const BlogDetailPage = ({ params }: { params: { id: string } }) => {
           setBlog({ id: blogSnap.id, ...blogSnap.data() });
         }
       } catch (e) {
-        console.error(`Error fetching blog details: ${e}`);
+        void e;
+        // console.error(`Error fetching blog details: ${e}`); for dev
       }
     };
 
@@ -29,7 +31,7 @@ const BlogDetailPage = ({ params }: { params: { id: string } }) => {
   }, [id]);
 
   if (!blog) {
-    return <div className="text-center mt-10">Blog not found.</div>;
+    return <div className="flex items-center justify-center h-screen"><Loader className="size-10 animate-spin" /></div>;
   }
 
   return (

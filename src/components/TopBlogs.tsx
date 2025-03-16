@@ -8,6 +8,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from "remark-gfm";
 import { buttonVariants } from './ui/button';
 import Image from 'next/image';
+import { Loader } from 'lucide-react';
 
 const TopBlogsSection = () => {
   const [topBlogs, setTopBlogs] = useState<any[]>([]);
@@ -18,7 +19,6 @@ const TopBlogsSection = () => {
         const blogsRef = collection(db, "blogs");
         const q = query(blogsRef, orderBy("likes", "desc"), limit(3));  // Order by 'likes' field, limit to top 3
         const querySnapshot = await getDocs(q);
-
         const fetchedBlogs = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
@@ -40,11 +40,11 @@ const TopBlogsSection = () => {
   };
 
   if (topBlogs.length === 0) {
-    return <div>Loading...</div>;
+    return <div className="flex items-center justify-center h-screen"><Loader className="size-12 animate-spin" /></div>;
   }
 
   return (
-    <section className="py-12 bg-white dark:bg-gray-900">
+    <section className="py-12 bg-white dark:bg-[#0a0a0a]">
       <div className="container px-4 mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-gray-800 dark:text-gray-200">Top Blog Posts</h2>
@@ -53,7 +53,7 @@ const TopBlogsSection = () => {
         <div className="flex flex-wrap justify-center">
           {topBlogs.map(blog => (
             <div key={blog.id} className="w-full sm:w-1/2 lg:w-1/3 p-4">
-              <div className="p-6 bg-white rounded-lg shadow-lg dark:bg-gray-800 transform transition duration-500 hover:scale-105 text-center">
+              <div className="p-6 bg-white rounded-lg shadow-lg dark:bg-[#111111] transform transition duration-500 hover:scale-105 text-center">
                 <Image
                   src={blog.pic}
                   alt={blog.title}
