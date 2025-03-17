@@ -4,6 +4,9 @@ import { addDoc, collection, doc, getDocs, orderBy, query, Timestamp } from "fir
 import { UseAuthStore } from "@/store/useAuthStore";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useThemeStore } from "@/store/useThemeStore"
+import { toast, ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 type PropsType = {
     blogId: string,
@@ -20,6 +23,7 @@ type Comments = {
 const CommentsSec = ({ blogId, closeFunc }: PropsType) => {
 
     const { user } = UseAuthStore((state) => state);
+    const { theme, detectTheme } = useThemeStore();
     const router = useRouter();
 
     const [comments, setComments] = useState<Comments[]>();
@@ -73,10 +77,16 @@ const CommentsSec = ({ blogId, closeFunc }: PropsType) => {
         loadComments()
     }, [blogId]);
 
+    useEffect(()=>{
+        detectTheme()
+    },[])
 
     // add comments handle function
     const handleAddComment = async () => {
         if (!user) {
+            setTimeout(() => {
+                toast.error("You are not logged in! Please login to comment." , { theme });
+            }, 1000);
             router.push("/login")
         }
         else if (newComment.trim() === "") return;
@@ -89,6 +99,8 @@ const CommentsSec = ({ blogId, closeFunc }: PropsType) => {
 
     return (
         <>
+        
+              <ToastContainer position='top-center' />
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm">
                 <div className="relative bg-white dark:bg-gray-800 w-full max-w-3xl h-full overflow-hidden rounded-lg md:w-3/4 md:h-[85vh] shadow-2xl">
                     {/* Header */}

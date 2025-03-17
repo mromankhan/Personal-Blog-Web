@@ -60,7 +60,7 @@ export const UseAuthStore = create<UseAuthStoreType>((set) => ({
         } catch (e) {
             void e;
             // console.log(e); for dev
-            toast.error("Invalid Email or Password");
+            toast.error("Invalid Email or Password", {theme: "colored"});
         } finally {
             set({ loading: false });
         }

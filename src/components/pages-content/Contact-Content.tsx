@@ -1,39 +1,22 @@
 "use client";
 import Navbar from '@/components/Navbar';
 import { db } from '@/firebase/firebaseConfig';
+import { useThemeStore } from '@/store/useThemeStore';
 import { addDoc, collection } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const ContactContent = () => {
-
+  
+  const { theme, detectTheme } = useThemeStore();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
-  const [theme, setTheme] = useState<'light' | 'dark'>('light'); // Default theme
 
   useEffect(() => {
-    // Function to detect theme
-    const detectTheme = () => {
-      const dataTheme = document.documentElement.getAttribute('data-theme');
-      const classTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-
-      // Prefer `data-theme`, fallback to class-based
-      const currentTheme = dataTheme || classTheme;
-      setTheme(currentTheme === 'dark' ? 'dark' : 'light');
-    };
-
-    // Initial detection
     detectTheme();
-
-    // Listen for changes to `data-theme` or class attribute
-    const observer = new MutationObserver(detectTheme);
-    observer.observe(document.documentElement, { attributes: true });
-
-    return () => observer.disconnect(); // Cleanup observer
-  }, []);
-
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

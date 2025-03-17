@@ -6,6 +6,8 @@ import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { FcGoogle } from "react-icons/fc";
 import { useRouter } from "next/navigation";
+import { UseAuthStore } from '@/store/useAuthStore';
+import { Loader2 } from 'lucide-react';
 
 type PropsTypes = {
   signup?: boolean,
@@ -22,6 +24,7 @@ const AuthFoam = ({ signup, func }: PropsTypes) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
+  const { loading } = UseAuthStore((state) => state);
 
 
   const googleSignIn = async () => {
@@ -87,8 +90,8 @@ const AuthFoam = ({ signup, func }: PropsTypes) => {
           />
           <Link href="/resetPassword" className='text-[#2563eb] hover:text-[#2a68ee] dark:text-[#3b82f6] dark:hover:text-[#60a5fa]'><p className='mt-2'>{!signup ? "Forget Password" : ""}</p></Link>
         </div>
-        <button type='submit' className="w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition duration-300" onClick={() => { func(email, password, name) }} >
-          {signup ? "Signin" : "Login"}
+        <button type='submit' disabled={loading} className="w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition duration-300" onClick={() => { func(email, password, name) }} >
+          {loading ? <span className='flex justify-center items-center'><Loader2 className="size-6 animate-spin" /></span> : signup ? "Signin" : "Login"}
         </button>
         <div className="flex items-center my-4">
           <div className="flex-1 border-t border-gray-300"></div>

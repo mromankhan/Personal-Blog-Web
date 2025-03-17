@@ -22,12 +22,14 @@ import { ToastContainer, toast } from 'react-toastify';
 import Image from 'next/image';
 import 'react-toastify/dist/ReactToastify.css';
 import { useRouter } from 'next/navigation';
+import { useThemeStore } from '@/store/useThemeStore';
 
 
 const BlogContent = () => {
 
   const router = useRouter();
   const { user } = UseAuthStore((state) => state);
+  const { theme, detectTheme } = useThemeStore();
   const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL
   const ADMIN_ID = process.env.NEXT_PUBLIC_ADMIN_ID
 
@@ -36,31 +38,9 @@ const BlogContent = () => {
   const [likedBlogs, setLikedBlogs] = useState<{ [key: string]: boolean }>({});
   const [dislikedBlogs, setDislikedBlogs] = useState<{ [key: string | ""]: boolean }>({});
   const [expendedBlogId, setexpendedBlogId] = useState<string | null>(null);
-  // const [showOptions, setShowOptions] = useState<{[key: string]: boolean}>({}); // Options ke liye state
   const [hoveredBlogId, setHoveredBlogId] = useState<string | null>(null);
-  const [theme, setTheme] = useState<'light' | 'dark'>('light'); // Default theme
 
 
-  useEffect(() => {
-    // Function to detect theme
-    const detectTheme = () => {
-      const dataTheme = document.documentElement.getAttribute('data-theme');
-      const classTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-
-      // Prefer `data-theme`, fallback to class-based
-      const currentTheme = dataTheme || classTheme;
-      setTheme(currentTheme === 'dark' ? 'dark' : 'light');
-    };
-
-    // Initial detection
-    detectTheme();
-
-    // Listen for changes to `data-theme` or class attribute
-    const observer = new MutationObserver(detectTheme);
-    observer.observe(document.documentElement, { attributes: true });
-
-    return () => observer.disconnect(); // Cleanup observer
-  }, []);
 
 
   const fetchBlogs = async () => {
@@ -75,6 +55,10 @@ const BlogContent = () => {
     }
   }
 
+
+  useEffect(() => {
+    detectTheme();
+  }, [])
 
   useEffect(() => {
     fetchBlogs();

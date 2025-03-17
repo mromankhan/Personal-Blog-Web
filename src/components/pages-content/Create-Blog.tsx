@@ -8,35 +8,26 @@ import 'react-toastify/dist/ReactToastify.css';
 import RichTextInput from '@/components/RichTextInput';
 import { useSearchParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
+import { useThemeStore } from '@/store/useThemeStore';
 
 const CreateBlogContent = () => {
   const searchParams = useSearchParams();
   const blogId = searchParams.get("blogId");
-
+  const { theme, detectTheme } = useThemeStore();
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [pic, setPic] = useState<File | null>(null);
   const [existingPic, setExistingPic] = useState("");
   const [currentDate, setCurrentDate] = useState(new Date().toISOString().split('T')[0]);
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  // const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [loading, setLoading] = useState(false);
   const likes = 0;
   const dislikes = 0;
 
-  useEffect(() => {
-    const detectTheme = () => {
-      const dataTheme = document.documentElement.getAttribute('data-theme');
-      const classTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-      setTheme(dataTheme || classTheme === 'dark' ? 'dark' : 'light');
-    };
-
-    detectTheme();
-    const observer = new MutationObserver(detectTheme);
-    observer.observe(document.documentElement, { attributes: true });
-
-    return () => observer.disconnect();
-  }, []);
+      useEffect(() => {
+        detectTheme();
+      },[])
 
   useEffect(() => {
     if (blogId) {
@@ -141,7 +132,7 @@ const CreateBlogContent = () => {
           </div>
 
           <button type="button" disabled={loading} onClick={handleBlogSubmission} className="w-full py-3 px-4 bg-blue-600 dark:bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400">
-            {loading ? <Loader2 className="size-12 animate-spin" /> : blogId ? "Update Blog" : "Submit"}
+            {loading ? <span className='flex justify-center items-center'><Loader2 className="size-6 animate-spin" /></span> : blogId ? "Update Blog" : "Submit"}
           </button>
         </form>
       </div>
